@@ -1,0 +1,78 @@
+<%- include("templates/header", { titulo: "Productos disponibles (Usuario)" }) %>
+
+<div class="alert alert-info">Selecciona los productos que deseas comprar.</div>
+
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Precio</th>
+      <th>Stock disponible</th>
+      <th>Categoría</th>
+      <th>Comprar</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (productos.length === 0) { %>
+      <tr><td colspan="5" class="text-center">No hay productos disponibles</td></tr>
+    <% } else { %>
+      <% productos.forEach(p => { %>
+        <tr>
+          <td><%= p.nombre %></td>
+          <td>$<%= p.precio.toFixed(2) %></td>
+          <td><%= p.stock %></td>
+          <td><%= p.categoria %></td>
+          <td>
+            <% if (p.stock > 0) { %>
+              <form data-precio="<%= p.precio %>" data-stock="<%= p.stock %>" class="form-comprar d-flex" action="/usuario/comprar" method="POST" style="gap:.5rem;">
+                <input type="hidden" name="idProducto" value="<%= p._id %>">
+                <input type="number" name="cantidad" min="1" max="<%= p.stock %>" value="1" class="form-control form-control-sm cantidad-input" style="width:80px;">
+                <input type="text" name="comprador" placeholder="Tu nombre" class="form-control form-control-sm" style="width:140px;">
+                <div class="me-2 d-flex align-items-center">
+                  <small class="text-muted me-2">Total:</small>
+                  <strong class="total-badge">$<span class="total-val"><%= p.precio.toFixed(2) %></span></strong>
+                </div>
+                <button type="submit" class="btn btn-success btn-sm">Comprar</button>
+              </form>
+            <% } else { %>
+              <span class="text-danger">Sin stock</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    <% } %>
+  </tbody>
+</table>
+
+<script>
+  // Calcula total por formulario y valida antes de enviar
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.form-comprar').forEach(form => {
+      const precio = parseFloat(form.dataset.precio);
+      const stock = parseInt(form.dataset.stock, 10);
+      const cantidadInput = form.querySelector('.cantidad-input');
+      const totalSpan = form.querySelector('.total-val');
+
+      function actualizar() {
+        let cant = parseInt(cantidadInput.value, 10) || 0;
+        if (cant < 1) cant = 1;
+        if (cant > stock) cant = stock;
+        cantidadInput.value = cant;
+        totalSpan.textContent = (precio * cant).toFixed(2);
+      }
+
+      actualizar();
+      cantidadInput.addEventListener('input', actualizar);
+
+      form.addEventListener('submit', (e) => {
+        const cant = parseInt(cantidadInput.value, 10);
+        if (!cant || cant < 1 || cant > stock) {
+          e.preventDefault();
+          alert('Cantidad inválida o supera el stock disponible.');
+        }
+      });
+    });
+  });
+</script>
+
+<%- include("templates/footer") %>
