@@ -18,7 +18,7 @@ const app = express();
 await conectarDB();
 await crearAdminPorDefecto();
 
-// Middlewares
+// --- Middlewares ---
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set("view engine", "ejs");
@@ -26,6 +26,11 @@ app.set("view engine", "ejs");
 // Carpeta pública y avatars
 app.use(express.static("public"));
 app.use("/images", express.static(path.join(process.cwd(), "web", "images")));
+
+// --- Trust Proxy (importante en Vercel) ---
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1); // confía en el primer proxy de Vercel
+}
 
 // Sesiones persistentes en MongoDB
 app.use(
@@ -40,7 +45,7 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60, // 1 hora
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" // solo HTTPS en producción
+      secure: process.env.NODE_ENV === "production" // HTTPS solo en producción
     }
   })
 );
@@ -51,7 +56,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rutas
+// --- Rutas ---
 app.use("/auth", authRoutes);
 app.use("/", rutasMain);
 app.use("/usuario", rutasUsuario);
