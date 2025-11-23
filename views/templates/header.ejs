@@ -14,27 +14,65 @@
         <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="/">Mi Proyecto Productos</a>
 
-          <div class="collapse navbar-collapse">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
               <li class="nav-item">
                 <a class="nav-link" href="/">Inicio</a>
               </li>
+
+              <% if (sessionUser) { %>
               <li class="nav-item">
-                <a class="nav-link" href="/usuario">Usuario</a>
+                <a class="nav-link" href="/usuario">Catálogo Usuario</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/admin/productos">Administrador</a>
-              </li>
+              <% } %>
+
+              <% if (sessionUser && sessionUser.rol === 'admin') { %>
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin/productos">Gestión de Productos</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin/usuarios">Gestión de Usuarios/Roles</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin/ventas">Historial de Compras</a>
+                </li>
+              <% } %>
             </ul>
 
-            <% if (titulo.includes("Admin")) { %>
-              <!-- Buscador solo visible en panel admin -->
+            <% if (sessionUser && sessionUser.rol === 'admin') { %>
               <form class="d-flex" action="/buscar" method="POST">
-                <input class="form-control me-2" type="search" name="buscar" placeholder="Buscar producto" />
+                <input class="form-control me-2" type="search" name="buscar" placeholder="Buscar producto"
+                  value="<%= typeof term !== 'undefined' ? term : '' %>" />
                 <button class="btn btn-outline-primary" type="submit">Buscar</button>
               </form>
             <% } %>
           </div>
+
+          <div class="d-flex align-items-center gap-3 ms-3">
+            <% if (sessionUser) { %>
+              <img src="/images/<%= sessionUser.avatar %>" 
+                   alt="avatar" 
+                   class="rounded-circle"
+                   style="width:40px;height:40px;object-fit:cover;">
+                   
+              <span class="fw-bold"><%= sessionUser.usuario %></span>
+
+              <a href="/auth/perfil" class="btn btn-outline-secondary btn-sm">Perfil</a>
+              <a href="/auth/logout" class="btn btn-danger btn-sm">Cerrar sesión</a>
+
+            <% } else { %>
+              <a href="/auth/login" class="btn btn-primary btn-sm">Iniciar sesión</a>
+              <a href="/auth/registrar" class="btn btn-outline-secondary btn-sm">Registrarse</a>
+            <% } %>
+          </div>
+
         </div>
       </nav>
     </header>

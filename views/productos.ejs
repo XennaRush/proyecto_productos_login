@@ -1,6 +1,6 @@
 <%- include("templates/header", { titulo: titulo || "Agregar Producto" }) %>
 
-<form action="/admin/productos/nuevo" method="POST" class="mb-3">
+<form action="/admin/productos/nuevo" method="POST" class="mb-3" enctype="multipart/form-data">
   <label>Nombre</label>
   <input name="nombre" class="form-control mb-2" required>
 
@@ -12,6 +12,9 @@
 
   <label>Categoría</label>
   <input name="categoria" class="form-control mb-3" required>
+
+  <label>Foto del producto (opcional)</label>
+  <input name="imagen" type="file" class="form-control mb-3" accept="image/*">
 
   <button class="btn btn-primary" type="submit">Agregar producto</button>
   <a href="/admin/productos" class="btn btn-secondary ms-2">Volver</a>

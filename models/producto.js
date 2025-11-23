@@ -23,6 +23,10 @@ const productoSchema = new mongoose.Schema(
       type: String,
       required: [true, "La categoría es obligatoria"],
       trim: true
+    },
+    imagen: {
+      type: String,
+      default: "default_producto.png"
     }
   },
   {

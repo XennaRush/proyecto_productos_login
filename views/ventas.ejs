@@ -1,36 +1,43 @@
-<%- include("templates/header", { titulo: "Historial de Ventas (Admin)" }) %>
+<%- include("templates/header", { titulo: titulo || "Historial de Ventas" }) %>
 
-<div class="alert alert-secondary">Aquí se muestran todas las ventas registradas.</div>
+<div class="alert alert-secondary">Aquí se muestran las ventas registradas.</div>
 
-<table class="table table-bordered table-hover align-middle">
-  <thead class="table-dark">
-    <tr>
-      <th>Producto</th>
-      <th>Cantidad</th>
-      <th>Precio Unitario</th>
-      <th>Total</th>
-      <th>Comprador</th>
-      <th>Fecha</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (ventas.length === 0) { %>
-      <tr>
-        <td colspan="6" class="text-center">No hay ventas registradas</td>
-      </tr>
-    <% } else { %>
-      <% ventas.forEach(v => { %>
+<% if (ventas.length === 0) { %>
+  <div class="alert alert-warning text-center">No hay ventas registradas</div>
+<% } else { %>
+  <% 
+    // Agrupar ventas por comprador
+    const agrupadas = {};
+    ventas.forEach(v => {
+      if (!agrupadas[v.comprador]) agrupadas[v.comprador] = [];
+      agrupadas[v.comprador].push(v);
+    });
+  %>
+  <% Object.keys(agrupadas).forEach(usuario => { %>
+    <h5 class="mt-4 mb-2">Compras de: <span class="text-primary"><%= usuario %></span></h5>
+    <table class="table table-bordered table-hover align-middle mb-4">
+      <thead class="table-dark">
         <tr>
-          <td><%= v.producto ? v.producto.nombre : "Producto eliminado" %></td>
-          <td><%= v.cantidad %></td>
-          <td>$<%= v.precioUnitario.toFixed(2) %></td>
-          <td>$<%= v.total.toFixed(2) %></td>
-          <td><%= v.comprador %></td>
-          <td><%= new Date(v.createdAt).toLocaleString("es-MX") %></td>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio Unitario</th>
+          <th>Total</th>
+          <th>Fecha</th>
         </tr>
-      <% }) %>
-    <% } %>
-  </tbody>
-</table>
+      </thead>
+      <tbody>
+        <% agrupadas[usuario].forEach(v => { %>
+          <tr>
+            <td><%= v.producto ? v.producto.nombre : "Producto eliminado" %></td>
+            <td><%= v.cantidad %></td>
+            <td>$<%= v.precioUnitario.toFixed(2) %></td>
+            <td>$<%= v.total.toFixed(2) %></td>
+            <td><%= new Date(v.createdAt).toLocaleString("es-MX") %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% }) %>
+<% } %>
 
 <%- include("templates/footer") %>

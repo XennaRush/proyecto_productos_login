@@ -6,17 +6,23 @@
       <div class="card-body">
         <h3 class="card-title">Gestor de Productos</h3>
         <p class="card-text">
-          Bienvenido al sistema de gestión de inventario. Aquí puedes ver el catálogo como usuario,
-          o administrar productos, ajustar stock y revisar el historial de ventas desde el panel de administrador.
+          Bienvenido al sistema de gestión de productos y ventas.<br>
+          <strong>¿Qué puedes hacer?</strong>
         </p>
         <ul>
-          <li>Agregar / Editar / Eliminar productos</li>
-          <li>Registrar ventas (los usuarios compran y el stock se reduce automáticamente)</li>
-          <li>Reponer stock desde el panel de administrador</li>
+          <li>Como <strong>Usuario</strong>: puedes comprar productos, ver tu historial de compras y editar tu perfil (incluyendo tu foto).</li>
+          <li>Como <strong>Administrador</strong>: puedes agregar, editar y borrar productos (con fotos), ver y cambiar el rol de usuarios, y consultar el historial de todas las compras.</li>
+          <li>El primer administrador se crea automáticamente. Todos los registros nuevos son usuarios normales.</li>
+          <li>Las fotos de perfil y productos se gestionan y eliminan correctamente en el servidor.</li>
         </ul>
         <div class="mt-3">
-          <a href="/usuario" class="btn btn-success me-2">Ir al Catálogo (Usuario)</a>
-          <a href="/admin/productos" class="btn btn-warning">Ir a Administrador</a>
+          <% if (sessionUser && sessionUser.rol === 'admin') { %>
+            <a href="/admin/productos" class="btn btn-warning me-2">Gestión de Productos</a>
+            <a href="/admin/usuarios" class="btn btn-info me-2">Gestión de Usuarios/Roles</a>
+            <a href="/admin/ventas" class="btn btn-secondary">Historial de Compras</a>
+          <% } else if (sessionUser) { %>
+            <a href="/usuario" class="btn btn-success">Ir al Catálogo (Usuario)</a>
+          <% } %>
         </div>
       </div>
     </div>
@@ -25,9 +31,9 @@
       <div class="card-header">Instrucciones rápidas</div>
       <div class="card-body">
         <ol>
-          <li>Como <strong>Usuario</strong>: selecciona cantidad y confirma la compra. Verás el stock actualizado.</li>
-          <li>Como <strong>Administrador</strong>: agrega nuevos productos, edita o borra existentes y repone stock.</li>
-          <li>Revisa el historial de ventas en <code>/admin/ventas</code>.</li>
+          <li>Como <strong>Usuario</strong>: compra productos, revisa tu historial y edita tu perfil.</li>
+          <li>Como <strong>Administrador</strong>: gestiona productos y usuarios, y consulta todas las compras.</li>
+          <li>Las fotos de perfil y productos se eliminan físicamente al borrar el usuario o producto.</li>
         </ol>
       </div>
     </div>
@@ -37,9 +43,16 @@
     <div class="card text-center">
       <div class="card-body">
         <h5 class="card-title">Accesos rápidos</h5>
-        <a href="/usuario" class="btn btn-outline-success mb-2 w-100">Catálogo Usuario</a>
-        <a href="/admin/productos" class="btn btn-outline-warning mb-2 w-100">Panel Admin</a>
-        <a href="/admin/ventas" class="btn btn-outline-info w-100">Historial de Ventas</a>
+        <% if (!sessionUser) { %>
+          <a href="/auth/login" class="btn btn-outline-primary mb-2 w-100">Iniciar sesión</a>
+          <a href="/auth/registrar" class="btn btn-outline-secondary mb-2 w-100">Registrarse</a>
+        <% } else if (sessionUser.rol === 'admin') { %>
+          <a href="/admin/productos" class="btn btn-outline-warning mb-2 w-100">Gestión de Productos</a>
+          <a href="/admin/usuarios" class="btn btn-outline-info mb-2 w-100">Gestión de Usuarios/Roles</a>
+          <a href="/admin/ventas" class="btn btn-outline-secondary w-100">Historial de Compras</a>
+        <% } else { %>
+          <a href="/usuario" class="btn btn-outline-success mb-2 w-100">Catálogo Usuario</a>
+        <% } %>
       </div>
     </div>
   </div>

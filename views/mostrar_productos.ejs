@@ -1,4 +1,4 @@
-<%- include("templates/header", { titulo: titulo || "Productos" }) %>
+<%- include("templates/header", { titulo: titulo || "Productos", term: typeof term !== 'undefined' ? term : '' }) %>
 
 <div class="mb-3">
   <a href="/admin/productos/nuevo" class="btn btn-primary">Agregar nuevo producto</a>
@@ -11,12 +11,13 @@
       <th>Precio</th>
       <th>Stock</th>
       <th>Categoria</th>
+      <th>Imagen</th>
       <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     <% if (productos.length === 0) { %>
-      <tr><td colspan="5" class="text-center">No hay productos</td></tr>
+      <tr><td colspan="6" class="text-center">No hay productos</td></tr>
     <% } %>
     <% productos.forEach(p => { %>
       <tr>
@@ -24,6 +25,9 @@
         <td>$<%= p.precio.toFixed(2) %></td>
         <td><%= p.stock %></td>
         <td><%= p.categoria %></td>
+        <td>
+          <img src="/images/<%= p.imagen || 'default_producto.png' %>" alt="imagen" style="width:60px;height:60px;object-fit:cover;">
+        </td>
         <td>
           <a class="btn btn-sm btn-primary" href="/admin/productos/editar/<%= p._id %>">Editar</a>
           <a class="btn btn-sm btn-danger" href="/admin/productos/borrar/<%= p._id %>" onclick="return confirm('Borrar producto?')">Borrar</a>

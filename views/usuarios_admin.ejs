@@ -1,0 +1,49 @@
+<%- include("templates/header", { titulo: "Usuarios" }) %>
+
+<div class="mb-3">
+  <a href="/admin/productos" class="btn btn-secondary">Volver a productos</a>
+</div>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Usuario</th>
+      <th>Rol</th>
+      <th>Avatar</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (usuarios && usuarios.length === 0) { %>
+      <tr><td colspan="5" class="text-center">No hay usuarios</td></tr>
+    <% } %>
+    <% if (usuarios) { usuarios.forEach(u => { %>
+      <tr>
+        <td><%= u.nombre %></td>
+        <td><%= u.usuario %></td>
+        <td>
+          <form action="/admin/usuarios/editar" method="POST" class="d-flex align-items-center gap-2">
+            <input type="hidden" name="id" value="<%= u._id %>">
+            <select name="rol" class="form-select form-select-sm" style="width:100px;">
+              <option value="usuario" <%= u.rol === 'usuario' ? 'selected' : '' %>>Usuario</option>
+              <option value="admin" <%= u.rol === 'admin' ? 'selected' : '' %>>Admin</option>
+            </select>
+            <button class="btn btn-sm btn-primary">Cambiar rol</button>
+          </form>
+        </td>
+        <td>
+          <img src="/images/<%= u.avatar %>" alt="avatar" class="rounded-circle" style="width:50px;height:50px;object-fit:cover;">
+        </td>
+        <td>
+          <form action="/admin/usuarios/borrar" method="POST" onsubmit="return confirm('¿Eliminar usuario?')">
+            <input type="hidden" name="id" value="<%= u._id %>">
+            <button class="btn btn-sm btn-danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    <% }) } %>
+  </tbody>
+</table>
+
+<%- include("templates/footer") %>

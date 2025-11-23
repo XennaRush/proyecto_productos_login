@@ -26,7 +26,7 @@ router.post("/buscar", async (req, res) => {
   try {
     const term = (req.body.buscar || "").trim();
     const productos = term ? await buscarPorNombre(term) : [];
-    res.render("mostrar_productos", { titulo: `Resultados: ${term}`, productos });
+    res.render("mostrar_productos", { titulo: `Resultados: ${term}`, productos, term });
   } catch (err) {
     console.error("Error en POST /buscar:", err);
     res.status(500).send("Error en la búsqueda");

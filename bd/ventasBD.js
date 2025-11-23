@@ -67,3 +67,17 @@ export async function obtenerVentaPorId(id) {
     throw err;
   }
 }
+
+/**
+ * Listar ventas de un usuario específico
+ */
+export async function listarVentasPorUsuario(usuario) {
+  try {
+    return await Venta.find({ comprador: usuario })
+      .populate("producto", "nombre precio categoria")
+      .sort({ createdAt: -1 });
+  } catch (err) {
+    console.error("Error listarVentasPorUsuario:", err.message);
+    throw err;
+  }
+}
