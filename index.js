@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import session from "express-session";
 import path from "path";
+import MongoStore from "connect-mongo";
 import { conectarDB } from "./bd/connection.js";
 import rutasMain from "./rutas/rutas.js";
 import rutasUsuario from "./rutas/usuario.js";
@@ -13,43 +14,45 @@ import { crearAdminPorDefecto } from "./bd/usuarioBD.js";
 dotenv.config();
 const app = express();
 
-// conectar BD y crear admin por defecto
+// Conectar a MongoDB Atlas y crear admin por defecto
 await conectarDB();
 await crearAdminPorDefecto();
 
-// middlewares
+// Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set("view engine", "ejs");
 
-// carpeta pública y avatars
+// Carpeta pública y avatars
 app.use(express.static("public"));
-// exponer avatars en /avatars
 app.use("/images", express.static(path.join(process.cwd(), "web", "images")));
 
-// sesiones
+// Sesiones persistentes en MongoDB
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "secreto_super_seguro",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      ttl: 60 * 60 // 1 hora
+    }),
     cookie: {
       maxAge: 1000 * 60 * 60, // 1 hora
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" // solo https en producción
+      secure: process.env.NODE_ENV === "production" // solo HTTPS en producción
     }
   })
 );
-// Las imágenes de perfil se almacenan en /web/images y se acceden vía /images/<nombreArchivo>
 
-// hacer la sesión disponible en vistas (opcional)
+// Hacer la sesión disponible en vistas
 app.use((req, res, next) => {
   res.locals.sessionUser = req.session?.user || null;
   next();
 });
 
-// rutas
-app.use("/auth", authRoutes); // rutas de auth: /auth/login, /auth/registrar, etc.
+// Rutas
+app.use("/auth", authRoutes);
 app.use("/", rutasMain);
 app.use("/usuario", rutasUsuario);
 app.use("/admin", rutasAdmin);
