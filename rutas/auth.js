@@ -35,9 +35,17 @@ router.post("/login", async (req, res) => {
     avatar: r.usuario.avatar || "default.png"
   };
 
-  // Redirigir según rol
-  if (r.usuario.rol === "admin") return res.redirect("/admin");
-  return res.redirect("/usuario");
+  // Guardar sesión antes de redirigir
+  req.session.save(err => {
+    if (err) {
+      console.error("Error guardando sesión:", err);
+      return res.render("login.ejs", { error: "Error guardando sesión" });
+    }
+
+    // Redirigir según rol
+    if (r.usuario.rol === "admin") return res.redirect("/admin");
+    return res.redirect("/usuario");
+  });
 });
 
 // GET: formulario registro
@@ -59,8 +67,10 @@ router.post("/registrar", (req, res) => {
 
 // GET: cerrar sesión
 router.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/auth/login");
+  req.session.destroy(err => {
+    if (err) console.error("Error destruyendo sesión:", err);
+    res.redirect("/auth/login");
+  });
 });
 
 // PERFIL -> requiere login
@@ -80,9 +90,8 @@ router.post("/perfil/editar", requireLogin, (req, res) => {
   subirAvatar()(req, res, async function (err) {
     if (err) return res.status(400).send(err.message);
 
-    // Si se solicita borrar avatar
+    // Borrar avatar si se solicita
     if (req.body.borrarAvatar) {
-      const { obtenerUsuarioPorId } = await import("../bd/usuarioBD.js");
       const usuario = await obtenerUsuarioPorId(req.session.user.id);
       if (usuario.avatar && usuario.avatar !== "default.png") {
         const fs = await import("fs");
@@ -91,7 +100,6 @@ router.post("/perfil/editar", requireLogin, (req, res) => {
         const ruta = path.join(uploadsDir, usuario.avatar);
         if (fs.existsSync(ruta)) fs.unlinkSync(ruta);
       }
-      // Actualizar avatar a default.png
       req.file = null;
       req.body.avatar = "default.png";
     }
@@ -99,12 +107,15 @@ router.post("/perfil/editar", requireLogin, (req, res) => {
     const r = await actualizarUsuario(req.session.user.id, req.body, req.file);
     if (!r.exito) return res.status(500).send(r.mensaje);
 
-    // actualizar sesión
+    // Actualizar sesión y guardar antes de redirigir
     req.session.user.nombre = r.usuario.nombre;
     req.session.user.usuario = r.usuario.usuario;
     req.session.user.avatar = r.usuario.avatar || "default.png";
 
-    res.redirect("/auth/perfil");
+    req.session.save(err => {
+      if (err) console.error("Error guardando sesión:", err);
+      res.redirect("/auth/perfil");
+    });
   });
 });
 
@@ -113,8 +124,10 @@ router.post("/perfil/eliminar", requireLogin, async (req, res) => {
   const r = await eliminarUsuario(req.session.user.id);
   if (!r.exito) return res.status(500).send(r.mensaje);
 
-  req.session.destroy();
-  res.redirect("/auth/registrar");
+  req.session.destroy(err => {
+    if (err) console.error("Error destruyendo sesión:", err);
+    res.redirect("/auth/registrar");
+  });
 });
 
 export default router;
